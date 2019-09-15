@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+  nginx:
+    image: 'nginx:latest'
+    container_name: nswitcher-nginx
+    volumes:
+      - .:/var/www/app
+      - ./.docker/nginx/conf:/etc/nginx/conf.d
+      - ./.docker/nginx/logs:/var/log/nginx
+    environment:
+      - TZ=Europe/Moscow
+    networks:
+      development:
+        aliases:
+          - nswitcher_land1.test
+          - nswitcher_land2.test
+      proxy-pass:
+        aliases:
+          - nginx
+  php:
+    image: 'php:7.2-cli'
+    container_name: nswitcher-php
+    command: ['php', '/var/www/app/builder/builder.php']
+    volumes:
+      - .:/var/www/app
+    environment:
+      - TZ=Europe/Moscow
+    networks:
+      proxy-pass:
+        aliases:
+          - php
+networks:
+  proxy-pass:
+  development:
+    external:
+      name: _develope
